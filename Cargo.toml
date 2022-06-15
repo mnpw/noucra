@@ -1,0 +1,19 @@
+[package]
+name = "noucra"
+version = "0.1.0"
+authors = ["Mrinal Paliwal <mrinalpaliwal98@gmail.com>"]
+edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/bin/main.rs"
+name = "noucra"
+
+[dependencies]
+actix-web = "4"
+tokio = {version = "1", features = ["macros", "rt-multi-thread", "test-util"]}
+
+[dev-dependencies]
+reqwest = "0.11"
