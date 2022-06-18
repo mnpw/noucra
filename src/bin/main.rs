@@ -1,10 +1,13 @@
 use std::net::TcpListener;
 
-use noucra::run;
+use noucra::{configuration, startup};
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    let listener = TcpListener::bind("0:8000").expect("Failed to bind to a port.");
+    let config = configuration::get_configuration().expect("Failed to read configuration.");
 
-    run(listener)?.await
+    let address = format!("0:{}", config.application_port);
+    let listener = TcpListener::bind(address)?;
+
+    startup::run(listener)?.await
 }
