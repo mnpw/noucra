@@ -35,7 +35,7 @@ DB_PORT=${POSTGRES_PORT:=5432}
 # -e: set env variables
 # -p: [host port]:[container port] mapping
 # -N: max connections
-if [[-z "${SKIP_DOCKER}"]]; then
+if [[ -z "${SKIP_DOCKER}" ]]; then
     docker run \
         -e POSTGRES_USER=${DB_USER} \
         -e POSTGRES_PASSWORD=${DB_PASSWORD} \
