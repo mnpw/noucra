@@ -3,9 +3,24 @@ use std::net::TcpListener;
 use noucra::{
     configuration::{get_configuration, DatabaseSettings},
     startup,
+    telemetry::{get_subscriber, init_subscriber},
 };
+use once_cell::sync::Lazy;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
+
+static TRACING: Lazy<()> = Lazy::new(|| {
+    let default_filter_level = "debug".to_string();
+    let subscriber_name = "test".to_string();
+
+    if std::env::var("TEST_LOG").is_ok() {
+        let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::stdout);
+        init_subscriber(subscriber);
+    } else {
+        let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::sink);
+        init_subscriber(subscriber);
+    }
+});
 
 struct TestApp {
     address: String,
@@ -13,6 +28,9 @@ struct TestApp {
 }
 
 async fn spawn_app() -> TestApp {
+    // Initialize tracing setup only once
+    Lazy::force(&TRACING);
+
     // create a tcp listner for server
     let listener = TcpListener::bind("0:0").expect("Failed to bind to a port.");
     let port = listener.local_addr().unwrap().port();
