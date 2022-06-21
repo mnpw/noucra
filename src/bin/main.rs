@@ -1,13 +1,12 @@
 use std::net::TcpListener;
 
-use env_logger::Env;
-use noucra::{configuration, startup};
+use noucra::{configuration, startup, telemetry};
 use sqlx::PgPool;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
-    // configure Logger
-    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+    let subscriber = telemetry::get_subscriber("noucra".into(), "info".into(), std::io::stdout);
+    telemetry::init_subscriber(subscriber);
 
     let config = configuration::get_configuration().expect("Failed to read configuration.");
     let connection_pool = PgPool::connect(&config.database.connection_url())
