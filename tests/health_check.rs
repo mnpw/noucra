@@ -6,6 +6,7 @@ use noucra::{
     telemetry::{get_subscriber, init_subscriber},
 };
 use once_cell::sync::Lazy;
+use secrecy::ExposeSecret;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 
@@ -54,16 +55,17 @@ async fn spawn_app() -> TestApp {
 
 async fn configure_database(db_config: DatabaseSettings) -> PgPool {
     // create a new database
-    let mut connection = PgConnection::connect(&db_config.connection_url_without_db())
-        .await
-        .expect("Failed to connect to Postgres.");
+    let mut connection =
+        PgConnection::connect(&db_config.connection_url_without_db().expose_secret())
+            .await
+            .expect("Failed to connect to Postgres.");
     connection
         .execute(format!(r#"CREATE DATABASE "{}";"#, db_config.database_name).as_str())
         .await
         .expect("Failed to create database.");
 
     // migrate database
-    let connection_pool = PgPool::connect(&db_config.connection_url())
+    let connection_pool = PgPool::connect(&db_config.connection_url().expose_secret())
         .await
         .expect("Failed to connect to Postgres.");
     sqlx::migrate!("./migrations")
