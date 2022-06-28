@@ -117,7 +117,7 @@ async fn subscribe_for_valid_data() {
 }
 
 #[tokio::test]
-async fn subscribe_for_invalid_data() {
+async fn subscribe_error_for_missing_param() {
     let app = spawn_app().await;
     let client = reqwest::Client::new();
 
@@ -139,6 +139,36 @@ async fn subscribe_for_invalid_data() {
         assert_eq!(
             400,
             response.status().as_u16(),
+            "Did not fail with payload {}",
+            case
+        );
+    }
+}
+
+#[tokio::test]
+async fn subscribe_error_for_invalid_data() {
+    let app = spawn_app().await;
+    let client = reqwest::Client::new();
+
+    let test_cases = vec![
+        ("email=bad-email&name=", "bad email"),
+        ("email=&name=TestName", "empty email"),
+        ("email=test@mail.com&name=", "empty name"),
+    ];
+
+    for (body, case) in test_cases {
+        let response = client
+            .post(format!("{}/subscriptions", app.address))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body(body)
+            .send()
+            .await
+            .expect("Request Failed");
+
+        eprintln!("Response: {}", response.status().as_u16());
+
+        assert!(
+            response.status().is_client_error(),
             "Did not fail with payload {}",
             case
         );
