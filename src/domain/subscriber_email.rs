@@ -4,7 +4,7 @@ use validator::validate_email;
 pub struct SubscriberEmail(String);
 
 impl SubscriberEmail {
-    fn parse(email: &str) -> Result<Self, String> {
+    pub fn parse(email: &str) -> Result<Self, String> {
         if validate_email(email) {
             Ok(Self(email.to_string()))
         } else {
